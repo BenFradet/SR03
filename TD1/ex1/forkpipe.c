@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdbool.h>
 #include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
@@ -53,58 +54,43 @@ int main()
 			close(pipefds[1]);
 			char buffer[20];
 			
-			int lineStartIndex = -1;
-			int lineHeadDisplay = 1;
 			int len;
+            bool newLine = true;
+            bool startLength = false;
+            int lengthCurrent = 0;
 			
 			while((len = read(pipefds[0], buffer, sizeof(buffer))) > 0)
 			{
 				int i;
 				for (i = 0; i < len; ++i)
 				{
-					//buffer contain the end line
-					if(buffer[i] == '\n')
+                    if(startLength)
                     {
-						//buffer contain whole line
-						if(lineStartIndex != 0)
+                        if(lengthCurrent < 3)
                         {
-							printf("recu>>>");
+                            lengthCurrent++;
                         }
-						int j = lineStartIndex;
-						for(;j < i;j++)
+                        else
                         {
-							putchar(buffer[j]);
+                            startLength = false;
+                            lengthCurrent = 0;
                         }
-						printf("<<<\n");
-						lineStartIndex = -1;
-					}
-					//In the middle of the line
-					else if(lineStartIndex != -1 && i == 0)
+                    }
+                    else if(buffer[i] == '\n')
                     {
-						lineStartIndex = 0;
-						lineHeadDisplay = 0;
-					}
-					//Ignore the first part of the line and mark the begin of the line
-					else if(buffer[i] == ']' && lineStartIndex == -1)
+                        printf("<<<\n");
+                        newLine = true;
+                    }
+                    else if(newLine)
                     {
-						lineStartIndex = i + 1;
-						lineHeadDisplay = printf;
-					}
-
-				}
-				//Print letter in the case of the begin of line and in the middle of line
-				if (lineStartIndex != -1 && lineStartIndex < len)
-				{
-					//We don't show this info in the middle of line	
-					if (lineHeadDisplay == 1)
-					{
-						printf("recu>>>");
-					}
-					int j = lineStartIndex;
-					for (; j < len; ++j)
-					{
-						putchar(buffer[j]);
-					}
+                        newLine = false;
+                        printf("recu>>>");
+                        startLength = true;
+                    }
+                    else
+                    {
+                        putchar(buffer[i]);
+                    }
 				}
 			}
 			close(pipefds[0]);
