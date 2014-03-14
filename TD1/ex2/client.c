@@ -82,6 +82,7 @@ int main()
 	msg message;
 	message.type = REQ_SRV;
 	message.req = DEM_NUM_CLT;
+	message.num_clt = 0;
 	cle = ftok("sr03p012", IPC_KEY);
 
 	//Check if the message queue exist
@@ -98,26 +99,31 @@ int main()
 	msgrcv(id_msg, (void *)&message, MSG_SIZE, REP_NUM_CLT, 0);
 	mon_num_clt = message.num_clt;
 
-	if(demandeCreerPanier(id_msg, &message, mon_num_clt) == 0){
+	int retFlag = 0;
+	if(retFlag = demandeCreerPanier(id_msg, &message, mon_num_clt) == 0){
 		puts("Panier est pret");
+	}else if(retFlag == -1){
+		puts("Server busy...");
 	}
 
 	message.ret = -1;
 
-	if(demandeListeObjets(id_msg, &message, mon_num_clt) == 0){
+	if(retFlag = demandeListeObjets(id_msg, &message, mon_num_clt) == 0){
 		int i;
 		puts("Objets fournis:");
 		for (i = 0; i < NB_MAX_TYP_OBJ; ++i)
 		{
 			printf("%d. %s\n", i+1, message.panier[i].name);
 		}
+	}else if(retFlag == -1){
+		puts("Server busy...");
 	}
 
-    if(demandeInfoObjet(id_msg, &message, mon_num_clt) == 0) {
+    /*if(demandeInfoObjet(id_msg, &message, mon_num_clt) == 0) {
         int i;
         for(i = 0; i < NB_MAX_TYP_OBJ; ++i) {
         }
-    }
+    }*/
 
 	return 0;
 }
