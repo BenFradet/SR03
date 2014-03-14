@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -20,14 +21,17 @@
 #define REP_LISTE_OBJETS    203
 #define REP_INFO_OBJ        204
 
-typedef struct _objet{
+#define OBJET_POMME         "Pomme"
+#define OBJET_BANANE        "Banane"
+#define OBJET_POIRE         "Poire"
+
+typedef struct _objet {
 	char   name[15];
 	float  prix;
 	int    nb;
 } objet;
 
-typedef struct
-{
+typedef struct {
 	long 	type;
 	int 	req;
 	int 	num_clt;
@@ -37,39 +41,51 @@ typedef struct
 
 const int MSG_SIZE = sizeof(msg) - sizeof(long);
 
-/*void afficherMenu(){
-	puts("1.Creer un panier d'achat.");
-	puts("2.La liste des types d'objets disponibles.");
-	puts("3.L'état du stock et le prix d'un objet.");
-	puts("4.Prélever des objets et les mettre dans un panier d'achat");
-	puts("5.Enlever des objets du panier");
-	puts("6.Vider le panier");
-	puts("7.Acheter le contenu du panier.");
-	puts("8.Fermer");
-	printf("\nChoix? =");
-}*/
+void afficherStockPrix(msg message, char objet_char) {
+    char objet_str[15];
+    switch(objet_char) {
+        case 'a':
+            strcpy(objet_str, "Pomme");
+            break;
+        case 'b':
+            strcpy(objet_str, "Banane");
+            break;
+        case 'p':
+            strcpy(objet_str, "Poire");
+           break; 
+    }
+    int i;
+    for(i = 0; i < NB_MAX_TYP_OBJ; ++i) {
+        if(strcmp(objet_str, message.panier[i].name)
+                == 0) {
+            printf("Prix: %f", message.panier[i].prix);
+            printf("Stock: %d", message.panier[i].nb);
+            return;
+        }
+    }
+}
 
-int demandeCreerPanier(int msgId, msg *message, int num_client){
+int demandeCreerPanier(int msg_id, msg *message, int num_client) {
 	message->type = REQ_SRV;
 	message->req = DEM_CREATION_PANIER;
-	msgsnd(msgId, message, MSG_SIZE, 0);
-	msgrcv(msgId, message, MSG_SIZE, num_client, 0);
+	msgsnd(msg_id, message, MSG_SIZE, 0);
+	msgrcv(msg_id, message, MSG_SIZE, num_client, 0);
 	return message->ret;
 }
 
-int demandeListeObjets(int msgId, msg *message, int num_client){
+int demandeListeObjets(int msg_id, msg *message, int num_client) {
 	message->type = REQ_SRV;
 	message->req = DEM_LISTE_OBJETS;
-	msgsnd(msgId, message, MSG_SIZE, 0);
-	msgrcv(msgId, message, MSG_SIZE, num_client, 0);
+	msgsnd(msg_id, message, MSG_SIZE, 0);
+	msgrcv(msg_id, message, MSG_SIZE, num_client, 0);
 	return message->ret;
 }
 
-int demandeInfoObjet(int msgId, msg* message, int num_client) {
+int demandeInfoObjet(int msg_id, msg* message, int num_client) {
     message->type = REQ_SRV;
     message->req = DEM_INFO_OBJ;
-    msgsnd(msgId, message, MSG_SIZE, 0);
-    msgrcv(msgId, message, MSG_SIZE, num_client, 0);
+    msgsnd(msg_id, message, MSG_SIZE, 0);
+    msgrcv(msg_id, message, MSG_SIZE, num_client, 0);
     return message->ret;
 }
 
@@ -86,8 +102,7 @@ int main()
 	cle = ftok("sr03p012", IPC_KEY);
 
 	//Check if the message queue exist
-	if (msgget(cle, IPC_EXCL) < 0)
-	{
+	if (msgget(cle, IPC_EXCL) < 0) {
 		perror("msgget");
 		exit(1);	
 	}
@@ -99,31 +114,61 @@ int main()
 	msgrcv(id_msg, (void *)&message, MSG_SIZE, REP_NUM_CLT, 0);
 	mon_num_clt = message.num_clt;
 
-	int retFlag = 0;
-	if(retFlag = demandeCreerPanier(id_msg, &message, mon_num_clt) == 0){
-		puts("Panier est pret");
-	}else if(retFlag == -1){
-		puts("Server busy...");
-	}
-
-	message.ret = -1;
-
-	if(retFlag = demandeListeObjets(id_msg, &message, mon_num_clt) == 0){
-		int i;
-		puts("Objets fournis:");
-		for (i = 0; i < NB_MAX_TYP_OBJ; ++i)
-		{
-			printf("%d. %s\n", i+1, message.panier[i].name);
-		}
-	}else if(retFlag == -1){
-		puts("Server busy...");
-	}
-
-    /*if(demandeInfoObjet(id_msg, &message, mon_num_clt) == 0) {
-        int i;
-        for(i = 0; i < NB_MAX_TYP_OBJ; ++i) {
+    char rep = '6';
+	int ret_flag = 0;
+    while(rep != '0') {
+        puts("Choisissez une des options suivantes:\n");
+        puts("(1) pour creer un nouveau panier");
+        puts("(2) pour demander la liste des objets disponibles");
+        puts("(3) pour consuler le prix et stock d'un produit");
+        puts("(0) pour sortir");
+        scanf("%c", &rep);
+        switch(rep) {
+            case '0':
+                break;
+            case '1':
+                if (ret_flag = demandeCreerPanier(id_msg, &message, mon_num_clt)
+                        == 0) {
+                    puts("Panier est pret");
+                } else if (ret_flag == -1) {
+                    puts("Server occupe...");
+                }
+                break;
+            case '2':
+                if (ret_flag = demandeListeObjets(id_msg, &message, mon_num_clt)
+                        == 0) {
+                    int i;
+                    puts("Objets fournis:");
+                    for (i = 0; i < NB_MAX_TYP_OBJ; ++i)
+                    {
+                        printf("%d. %s\n", i+1, message.panier[i].name);
+                    }
+                } else if (ret_flag == -1) {
+                    puts("Server occupe...");
+                }
+                break;
+            case '3':
+                if (ret_flag = demandeInfoObjet(id_msg, &message, mon_num_clt)
+                       == 0) {
+                    char objet_char = 't';
+                    while(objet_char != 'a' && objet_char != 'b'
+                            && objet_char != 'p') {
+                        puts("Choisissez un type d'objet\n");
+                        puts("(a) pour avoir le stock et prix des pommes");
+                        puts("(b) pour avoir le stock et prix des bananes");
+                        puts("(p) pour avoir le stock et prix des poires");
+                        scanf("%c", &objet_char);
+                    }
+                    afficherStockPrix(message, objet_char);
+                } else if(ret_flag == -1) {
+                    puts("Serveur occupe...");
+                } 
+                break;
+            default:
+                puts("Entrez une option valide");
+                break;
         }
-    }*/
+    }
 
 	return 0;
 }
