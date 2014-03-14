@@ -12,10 +12,13 @@
 #define DEM_NUM_CLT 		101
 #define DEM_CREATION_PANIER 102
 #define DEM_LISTE_OBJETS	103
+#define DEM_INFO_OBJ        104
 
 #define REP_CLT_PLEIN		200
 #define REP_NUM_CLT 		201
 #define REP_CREATION_PANIER	202
+#define REP_LISTE_OBJETS    203
+#define REP_INFO_OBJ        204
 
 typedef struct _objet{
 	char   name[15];
@@ -62,9 +65,16 @@ int demandeListeObjets(int msgId, msg *message, int num_client){
 	return message->ret;
 }
 
+int demandeInfoObjet(int msgId, msg* message, int num_client) {
+    message->type = REQ_SRV;
+    message->req = DEM_INFO_OBJ;
+    msgsnd(msgId, message, MSG_SIZE, 0);
+    msgrcv(msgId, message, MSG_SIZE, num_clt, 0);
+    return message->ret;
+}
+
 int main()
 {
-
 	int id_msg;
 	key_t cle;
 	int mon_num_clt;
@@ -102,6 +112,12 @@ int main()
 			printf("%d. %s\n", i+1, message.panier[i].name);
 		}
 	}
+
+    if(demandeInfoObjet(id_msg, &message, mon_num_clt) == 0) {
+        int i;
+        for(i = 0; i < NB_MAX_TYP_OBJ; ++i) {
+        }
+    }
 
 	return 0;
 }

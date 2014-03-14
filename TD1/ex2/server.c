@@ -18,11 +18,13 @@
 #define DEM_NUM_CLT 		101
 #define DEM_CREATION_PANIER 102
 #define DEM_LISTE_OBJETS	103
+#define DEM_INFO_OBJ        104
 
 #define REP_CLT_PLEIN		200
 #define REP_NUM_CLT 		201
 #define REP_CREATION_PANIER	202
 #define REP_LISTE_OBJETS	203
+#define REP_INFO_OBJ        204
 
 #define OBJET_UN			"Pomme"
 #define OBJET_DEUX			"Banane"
@@ -45,7 +47,7 @@ typedef struct
 } msg;
 
 int id_msg;
-static objet stokage[NB_MAX_TYP_OBJ];
+static objet stockage[NB_MAX_TYP_OBJ];
 
 void sigintHandler(){
 	msgctl(id_msg,IPC_RMID,0);
@@ -62,15 +64,17 @@ int main()
 	int nb_client;
 	objet clientPanier[NB_MAX_TYP_OBJ];
 	msg message;
+    //numero client a retourner au client
+    int num_client = 0;
 	cle = ftok("sr03p012", IPC_KEY);
 
-	//init stokage
+	//init stockage
 	objet tmpObjet1 = {OBJET_UN, 2.5, 20};
-	stokage[0] = tmpObjet1;
+	stockage[0] = tmpObjet1;
 	objet tmpObjet2 = {OBJET_DEUX, 1.6, 10};
-	stokage[1] = tmpObjet2;
+	stockage[1] = tmpObjet2;
 	objet tmpObjet3 = {OBJET_TROIS, 2.0, 15};
-	stokage[2] = tmpObjet3;
+	stockage[2] = tmpObjet3;
 
 	signal(SIGINT, sigintHandler);
 	
@@ -102,7 +106,9 @@ int main()
 							break;
 						}
 						message.type = REP_NUM_CLT;
-						message.num_clt = rand()%100;
+                        //enlever le rand pour eviter 2 clients avec le même
+                        //numéro
+						message.num_clt = num_client++;
 						msgsnd(id_msg, (void*)&message, MSG_SIZE, 0);
 						puts("cli_noid <---[fournir numéro client]--- serveur          REP_NUM_CLT\n");
 						nb_client++;
@@ -120,6 +126,8 @@ int main()
 						clientPanier[0] = tmpObjet1;
 						clientPanier[1] = tmpObjet2;
 						clientPanier[2] = tmpObjet3;
+                        memcpy(message.panier, clientPanier,
+                                sizeof(message.panier));
 						message.ret = 0;
 						msgsnd(id_msg, (void*)&message, MSG_SIZE, 0);
 						
@@ -143,6 +151,24 @@ int main()
 						puts(tmpLog);
 						memset(tmpLog, 0, sizeof(tmpLog));
 						break;
+                    case DEM_INFO_OBJ:
+                        sprintf(tmpLog, "cli_%d ---[Demande du stock et du prix]--> serveur    DEM_INFO_OBJ\n", message.num_clt);
+                        puts(tmpLog);
+                        memset(tmpLog, 0, sizeof(tmpLog));
+
+                        message.type = message.num_clt;
+                        message.req = REP_INFO_OBJ;
+                        memcpy(message.panier, stockage, 
+                                sizeof(message.panier));
+
+                        message.ret = 0;
+                        msgsnd(id_msg, (void *)&message, MSG_SIZE, 0);
+
+                        sprintf(tmpLog, "cli_%d <---[Fournir le stock et prix]--- REP_INFO_OBJ\n",
+                                message.num_clt);
+                        puts(tmpLog);
+                        memset(tmpLog, 0, sizeof(tmpLog));
+                        break;
 				}
 			}
 		}
