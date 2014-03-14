@@ -69,7 +69,7 @@ int demandeInfoObjet(int msgId, msg* message, int num_client) {
     message->type = REQ_SRV;
     message->req = DEM_INFO_OBJ;
     msgsnd(msgId, message, MSG_SIZE, 0);
-    msgrcv(msgId, message, MSG_SIZE, num_clt, 0);
+    msgrcv(msgId, message, MSG_SIZE, num_client, 0);
     return message->ret;
 }
 
