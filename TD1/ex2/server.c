@@ -142,7 +142,7 @@ void traiteMessage(msg *message, int *nbClient, objet *clientPanier,
             message->ret = 0;
             msgsnd(id_msg, message, MSG_SIZE, 0);
 
-            sprintf(tmpLog, "cli_%d <---[Fournir le stock et prix]--- \
+            sprintf(tmpLog, "cli_%d <---[Fournir le stock et prix]---\
                     REP_INFO_OBJ\n", message->num_clt);
             puts(tmpLog);
             break;

@@ -56,10 +56,9 @@ void afficherStockPrix(msg message, char objet_char) {
     }
     int i;
     for(i = 0; i < NB_MAX_TYP_OBJ; ++i) {
-        if(strcmp(objet_str, message.panier[i].name)
-                == 0) {
-            printf("Prix: %f", message.panier[i].prix);
-            printf("Stock: %d", message.panier[i].nb);
+        if(strcmp(objet_str, message.panier[i].name) == 0) {
+            printf("Prix: %f\n", message.panier[i].prix);
+            printf("Stock: %d\n", message.panier[i].nb);
             return;
         }
     }
@@ -94,7 +93,6 @@ int main()
 	int id_msg;
 	key_t cle;
 	int mon_num_clt;
-	//int choix;
 	msg message;
 	message.type = REQ_SRV;
 	message.req = DEM_NUM_CLT;
@@ -102,7 +100,7 @@ int main()
 	cle = ftok("sr03p012", IPC_KEY);
 
 	//Check if the message queue exist
-	if (msgget(cle, IPC_EXCL) < 0) {
+	if(msgget(cle, IPC_EXCL) < 0) {
 		perror("msgget");
 		exit(1);	
 	}
@@ -114,59 +112,53 @@ int main()
 	msgrcv(id_msg, (void *)&message, MSG_SIZE, REP_NUM_CLT, 0);
 	mon_num_clt = message.num_clt;
 
-    char rep = '6';
+    char rep[20] = "init";
 	int ret_flag = 0;
-    while(rep != '0') {
-        puts("Choisissez une des options suivantes:\n");
+    while(strcmp(rep, "0") != 0) {
+        puts("\n\nChoisissez une des options suivantes:\n");
         puts("(1) pour creer un nouveau panier");
         puts("(2) pour demander la liste des objets disponibles");
         puts("(3) pour consuler le prix et stock d'un produit");
         puts("(0) pour sortir");
-        scanf("%c", &rep);
-        switch(rep) {
-            case '0':
-                break;
-            case '1':
-                if (ret_flag = demandeCreerPanier(id_msg, &message, mon_num_clt)
-                        == 0) {
-                    puts("Panier est pret");
-                } else if (ret_flag == -1) {
-                    puts("Server occupe...");
+        scanf("%s", &rep);
+
+        if(strcmp(rep, "1") == 0) {
+            ret_flag = demandeCreerPanier(id_msg, &message, mon_num_clt);
+            if(ret_flag == 0) {
+                puts("Panier est pret");
+            } else if(ret_flag == -1) {
+                puts("Server occupe...");
+            }
+        } else if(strcmp(rep, "2") == 0) {
+            ret_flag = demandeListeObjets(id_msg, &message, mon_num_clt);
+            if(ret_flag == 0) {
+                int i;
+                puts("Objets fournis:");
+                for(i = 0; i < NB_MAX_TYP_OBJ; ++i) {
+                    printf("%d. %s\n", i+1, message.panier[i].name);
                 }
-                break;
-            case '2':
-                if (ret_flag = demandeListeObjets(id_msg, &message, mon_num_clt)
-                        == 0) {
-                    int i;
-                    puts("Objets fournis:");
-                    for (i = 0; i < NB_MAX_TYP_OBJ; ++i)
-                    {
-                        printf("%d. %s\n", i+1, message.panier[i].name);
-                    }
-                } else if (ret_flag == -1) {
-                    puts("Server occupe...");
+            } else if(ret_flag == -1) {
+                puts("Server occupe...");
+            }
+        } else if(strcmp(rep, "3") == 0) {
+            ret_flag = demandeInfoObjet(id_msg, &message, mon_num_clt);
+            if(ret_flag == 0) {
+                char objet_char[20] = "init";
+                while(strcmp(objet_char, "a") != 0 &&
+                        strcmp(objet_char, "b") != 0 && 
+                        strcmp(objet_char, "p") != 0) {
+                    puts("Choisissez un type d'objet\n");
+                    puts("(a) pour avoir le stock et prix des pommes");
+                    puts("(b) pour avoir le stock et prix des bananes");
+                    puts("(p) pour avoir le stock et prix des poires");
+                    scanf("%s", &objet_char);
                 }
-                break;
-            case '3':
-                if (ret_flag = demandeInfoObjet(id_msg, &message, mon_num_clt)
-                       == 0) {
-                    char objet_char = 't';
-                    while(objet_char != 'a' && objet_char != 'b'
-                            && objet_char != 'p') {
-                        puts("Choisissez un type d'objet\n");
-                        puts("(a) pour avoir le stock et prix des pommes");
-                        puts("(b) pour avoir le stock et prix des bananes");
-                        puts("(p) pour avoir le stock et prix des poires");
-                        scanf("%c", &objet_char);
-                    }
-                    afficherStockPrix(message, objet_char);
-                } else if(ret_flag == -1) {
-                    puts("Serveur occupe...");
-                } 
-                break;
-            default:
-                puts("Entrez une option valide");
-                break;
+                afficherStockPrix(message, objet_char[0]);
+            } else if(ret_flag == -1) {
+                puts("Serveur occupe...");
+            } 
+        } else if(strcmp(rep, "0") != 0) {
+            puts("Entrez une option valide");
         }
     }
 
