@@ -14,12 +14,15 @@
 #define DEM_CREATION_PANIER 102
 #define DEM_LISTE_OBJETS	103
 #define DEM_INFO_OBJ        104
+#define DEM_QUIT_MAG        105
 
 #define REP_CLT_PLEIN		200
 #define REP_NUM_CLT 		201
 #define REP_CREATION_PANIER	202
 #define REP_LISTE_OBJETS    203
 #define REP_INFO_OBJ        204
+#define REP_SERVER_FULL     205
+#define REP_QUIT_MAG        206
 
 #define OBJET_POMME         "Pomme"
 #define OBJET_BANANE        "Banane"
@@ -88,6 +91,14 @@ int demandeInfoObjet(int msg_id, msg* message, int num_client) {
     return message->ret;
 }
 
+int demandeQuiterMagasin(int msg_id, msg* message, int num_client){
+    message->type = REQ_SRV;
+    message->req = DEM_QUIT_MAG;
+    msgsnd(msg_id, message, MSG_SIZE, 0);
+    msgrcv(msg_id, message, MSG_SIZE, num_client, 0);
+    return message->ret;
+}
+
 int main()
 {
 	int id_msg;
@@ -111,6 +122,11 @@ int main()
 	msgsnd(id_msg, (void *)&message, MSG_SIZE, 0);
 	msgrcv(id_msg, (void *)&message, MSG_SIZE, REP_NUM_CLT, 0);
 	mon_num_clt = message.num_clt;
+
+    if(mon_num_clt < 0){
+        puts("Serveur atteins la limite...");
+        return 0;
+    }
 
     char rep[20] = "init";
 	int ret_flag = 0;
@@ -157,7 +173,9 @@ int main()
             } else if(ret_flag == -1) {
                 puts("Serveur occupe...");
             } 
-        } else if(strcmp(rep, "0") != 0) {
+        } else if(strcmp(rep, "0") == 0) {
+            demandeQuiterMagasin(id_msg, &message, mon_num_clt);
+        } else{
             puts("Entrez une option valide");
         }
     }
