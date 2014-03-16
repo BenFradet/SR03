@@ -91,7 +91,7 @@ int demandeInfoObjet(int msg_id, msg* message, int num_client) {
     return message->ret;
 }
 
-int demandeQuiterMagasin(int msg_id, msg* message, int num_client){
+int demandeQuitterMagasin(int msg_id, msg* message, int num_client){
     message->type = REQ_SRV;
     message->req = DEM_QUIT_MAG;
     msgsnd(msg_id, message, MSG_SIZE, 0);
@@ -124,7 +124,7 @@ int main()
 	mon_num_clt = message.num_clt;
 
     if(mon_num_clt < 0){
-        puts("Serveur atteins la limite...");
+        puts("Serveur a atteint le nombre de clients maximum...");
         return 0;
     }
 
@@ -174,7 +174,7 @@ int main()
                 puts("Serveur occupe...");
             } 
         } else if(strcmp(rep, "0") == 0) {
-            demandeQuiterMagasin(id_msg, &message, mon_num_clt);
+            demandeQuitterMagasin(id_msg, &message, mon_num_clt);
         } else{
             puts("Entrez une option valide");
         }

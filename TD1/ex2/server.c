@@ -63,7 +63,7 @@ typedef struct _VP{
 	objet 	stockage[NB_MAX_TYP_OBJ];
 	objet*	panier_list[NB_MAX_CLT];
 	bool 	sous_processus_existe;
-}VP;
+} VP;
 
 void sigintHandler() {
 	msgctl(id_msg,IPC_RMID,0);
@@ -77,7 +77,7 @@ void sousProcessusCompeleteHandler() {
 
 int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 	char tmpLog[255];
-	if(!shmptr->mutex){
+	if(!shmptr->mutex) {
 		shmptr->mutex = true;
 
 		int i = 0;
@@ -85,7 +85,7 @@ int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 			case DEM_NUM_CLT:
 				puts("cli_noid ---[demande numéro client]---> serveur\
 	                    DEM_NUM_CLT\n");
-				if (shmptr->nb_client == NB_MAX_CLT) {
+				if(shmptr->nb_client == NB_MAX_CLT) {
 					message->type = REP_NUM_CLT;
 					message->num_clt = -1;
 					msgsnd(id_msg, message, MSG_SIZE, 0);
@@ -95,8 +95,6 @@ int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 				}
 				message->type = REP_NUM_CLT;
 	            
-	            //enlever le rand pour eviter 2 clients avec le même
-	            //numéro
 				message->num_clt = shmptr->num_client;
 				shmptr->num_client = (shmptr->num_client % 4) + 1;
 				msgsnd(id_msg, message, MSG_SIZE, 0);
@@ -112,8 +110,8 @@ int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 
 				message->type = message->num_clt;
 				message->req = REP_CREATION_PANIER;
-				shmptr->panier_list[message->num_clt - 1] = (objet *)calloc(NB_MAX_TYP_OBJ,
-																		sizeof(objet));
+				shmptr->panier_list[message->num_clt - 1] = 
+                    (objet *)calloc(NB_MAX_TYP_OBJ,	sizeof(objet));
 				memcpy(
 					   shmptr->panier_list[message->num_clt - 1], 
 					   shmptr->stockage, 
@@ -138,16 +136,17 @@ int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 				puts(tmpLog);
 				break;
 			case DEM_LISTE_OBJETS:
-				sprintf(tmpLog, "cli_%d ---[Demande la liste d'objet]---> serveur\
-	                    DEM_LISTE_OBJETS\n", message->num_clt);
+				sprintf(tmpLog, "cli_%d ---[Demande la liste d'objet]--->\
+                        serveur DEM_LISTE_OBJETS\n", message->num_clt);
 				puts(tmpLog);
 				memset(tmpLog, 0, sizeof(tmpLog));
 
 				message->type = message->num_clt;
 				message->req = REP_LISTE_OBJETS;
-				memcpy(message->panier, shmptr->stockage, sizeof(shmptr->stockage));
+				memcpy(message->panier, shmptr->stockage, 
+                        sizeof(shmptr->stockage));
 
-				for(i = 0;i < NB_MAX_TYP_OBJ;i++) {
+				for(i = 0; i < NB_MAX_TYP_OBJ;i++) {
 					message->panier[i].nb = 0;
 	            }
 				
@@ -166,7 +165,8 @@ int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 
 	            message->type = message->num_clt;
 	            message->req = REP_INFO_OBJ;
-	            memcpy(message->panier, shmptr->stockage, sizeof(shmptr->stockage));
+	            memcpy(message->panier, shmptr->stockage, 
+                        sizeof(shmptr->stockage));
 
 	            message->ret = 0;
 	            msgsnd(id_msg, message, MSG_SIZE, 0);
@@ -194,7 +194,7 @@ int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 	                    REP_INFO_OBJ\n", message->num_clt);
 	            puts(tmpLog);
 		}
-		if (is_sous_processus) {
+		if(is_sous_processus) {
 			shmptr->sous_processus_existe = false;
 			shmptr->mutex = false;
 		} else {
@@ -205,8 +205,7 @@ int traiteMessage(msg *message, VP* shmptr, bool is_sous_processus) {
 		}
 
 		return 0;
-
-	} else{
+	} else {
 		return 1;
 	}
 }
@@ -217,7 +216,6 @@ int main()
 
 	pid_t sp;
 	key_t cle;
-//	int nb_client;
 	objet clientPanier[NB_MAX_TYP_OBJ];
 	msg message;
 
@@ -225,12 +223,18 @@ int main()
 	int shmid;
 	VP *shmptr = NULL;
 
-	if(shmid = shmget(IPC_PRIVATE, sizeof(VP), IPC_CREAT | 0666) < 0){
+	if((shmid = shmget(IPC_PRIVATE, sizeof(VP), IPC_CREAT | 0666)) < 0){
 		perror("shmget");
 		exit(1);
 	}
 
-	//Initialisation de memoire partage
+    //char *tmp_shm;
+	////Initialisation de memoire partage
+    //if((tmp_shm = shmat(shmid, NULL, 0)) == (char *)-1) {
+    //    perror("shmat");
+    //    exit(1);
+    //}
+
 	shmptr = (VP *)shmat(shmid, NULL, 0);
 	shmptr->mutex = false;
 	shmptr->sous_processus_existe = false;
@@ -238,8 +242,9 @@ int main()
 	shmptr->num_client = 1;
 
 	int i;
-	for(i = 0; i < NB_MAX_CLT; i++)
+	for(i = 0; i < NB_MAX_CLT; i++) {
 		shmptr->panier_list[i] = NULL;
+    }
 	
 	objet tmpObjet1 = {OBJET_POMME, 2.5, 20};
 	objet tmpObjet2 = {OBJET_BANANE, 1.6, 10};
@@ -268,7 +273,7 @@ int main()
 		} else {
 			while(1) {
 				msgrcv(id_msg, &message, MSG_SIZE, REQ_SRV, 0);
-				if (!client_table[message.num_clt])	{
+				if(!client_table[message.num_clt])	{
 					client_table[message.num_clt] = true;
 				} else {
 					message.type = message.num_clt;
@@ -278,7 +283,7 @@ int main()
 					continue;
 				}
 
-				if (!shmptr->sous_processus_existe) {
+				if(!shmptr->sous_processus_existe) {
 					sp = fork();
 					if(sp == -1) {
 						perror("Sous processus");
@@ -309,12 +314,12 @@ int main()
 				
 				puts("Main task:");
 				
-				while(traiteMessage(&message, shmptr, false) == 1){
+				while(traiteMessage(&message, shmptr, false) == 1) {
 					puts("Main waiting...");
 					sleep(1);
 				}
 
-				if (message.type == REP_NUM_CLT) {
+				if(message.type == REP_NUM_CLT) {
 					client_table[0] = false;
 				} else {
 					client_table[message.num_clt] = false;
