@@ -257,19 +257,17 @@ int main()
     //le meme client en 2 ligne
 	bool client_table[NB_MAX_CLT + 1] = {false, false, false, false, false};
 
-    //numero client a retourner au client
-//    int num_client = 1;
 	cle = ftok("sr03p012", IPC_KEY);
 
 	signal(SIGINT, sigintHandler);
-//	signal(SIGUSR1, sousProcessusCompeleteHandler);
 	
 	if(cle == -1) {
 		perror("ftok");
 	} else {
 		id_msg = msgget(cle, IPC_CREAT|IPC_EXCL|0666);
 		if(id_msg == -1) {
-			perror("msgget");
+			perror("Un seul serveur est autorise");
+            exit(1);
 		} else {
 			while(1) {
 				msgrcv(id_msg, &message, MSG_SIZE, REQ_SRV, 0);

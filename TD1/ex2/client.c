@@ -112,7 +112,7 @@ int main()
 
 	//Check if the message queue exist
 	if(msgget(cle, IPC_EXCL) < 0) {
-		perror("msgget");
+		perror("Aucun server n'a pu etre contacte");
 		exit(1);	
 	}
 
