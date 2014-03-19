@@ -7,9 +7,11 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "iniobj.h"
+#include "defobj.h"
 
-void reception(int clientfd) {
+#define  ARRET	2
+
+int reception(int clientfd) {
 	obj objet;
 	read(clientfd, &objet, sizeof(obj));
 	while(objet.fin == 0) {
@@ -17,6 +19,15 @@ void reception(int clientfd) {
                 objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
 		read(clientfd, &objet, sizeof(obj));
 	}
+	putchar('\n');
+
+	//Detecter l'arret
+	int n = read(clientfd, &objet, sizeof(obj));
+	if(n > 0 && objet.fin == ARRET){
+		return 1;
+	}
+
+	return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -28,7 +39,7 @@ int main(int argc, char *argv[]) {
 	int sd, port, clientfd, clienlen;
 	struct sockaddr_in server_addr, clien_addr;
 
-	if(sd = socket(AF_INET, SOCK_STREAM, 0) < 0) {
+	if((sd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 			perror("socket");
 			exit(1);	
 	}
@@ -38,7 +49,7 @@ int main(int argc, char *argv[]) {
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	if(bind(sd, (struct sockaddr *)&server_addr,
+	if(	bind(sd, (struct sockaddr *)&server_addr,
 			sizeof(struct sockaddr_in)) < 0){
 			perror("bind");
 			exit(1);
@@ -48,16 +59,24 @@ int main(int argc, char *argv[]) {
 		
 	clienlen = sizeof(struct sockaddr_in);
 	while(1) {
-			if(clientfd = accept(sd, 0, 0) < 0) {
-				perror("accept");
-				exit(1);	
-			}
-			pid_t pid;
-			int status;
-			if(pid = fork() == 0) {
-					reception(clientfd);
-					return 0;
-			}
-			waitpid(pid, &status, 0);
+		if((clientfd = accept(sd, 0, 0)) < 0) {
+			perror("accept");
+			exit(1);	
+		}
+		
+		int status;
+		pid_t pid = fork();
+		if(pid == 0) {
+			exit(reception(clientfd));
+		}
+		waitpid(pid, &status, 0);
+		if(WEXITSTATUS(status) == 1){
+			break;
+		}
 	}
+
+	close(clientfd);
+	close(sd);
+
+	return 0;
 }
