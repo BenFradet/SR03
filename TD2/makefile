@@ -1,11 +1,10 @@
-sero.o:sero.c iniobj.h defobj.h
-	gcc -o sero.o -c sero.c
+all: sero clio
 
-clio.o:clio.c iniobj.h defobj.h
-	gcc -o sero.o -c clio.c
+sero: sero.c
+		gcc sero.c -o sero
 
-sero:sero.o
-	gcc -o sero sero.o
+clio: clio.c
+		gcc clio.c -o clio
 
-clio:clio.o
-	gcc -o clio clio.o
+clean:
+	rm -rf *o sero clio

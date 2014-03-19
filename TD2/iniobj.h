@@ -1,8 +1,11 @@
-//#include <defobj.h>
+#include "defobj.h"
 #define TABLEN	3
 
-obj obj1 = {"ident_o1", "description_o1", 11, 12, 10.2345, 0};
-obj obj2 = {"ident_o2", "description_o2", 21, 22, 20.2345, 0};
-obj obj3 = {"ident_o3", "description_o3", 31, 32, 30.2345, 0};
-
-obj objtab[3] = {obj1, obj2, obj3};
+obj objtab[3] = {
+    { .str1 = "ident_o1", .str2 = "description_o1", 
+        .ii =  11, .jj = 12, .dd = 10.2345, .fin = 0 },
+    { .str1 = "ident_o2", .str2 = "description_o2",
+        .ii = 21, .jj = 22, .dd = 20.2345, .fin = 0 },
+    { .str1 = "ident_o3", "description_o3",
+        .ii = 31, .jj = 32, .dd = 30.2345, .fin = 0 }
+};
