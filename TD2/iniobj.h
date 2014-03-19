@@ -1,4 +1,3 @@
-#include "defobj.h"
 #define TABLEN	3
 
 obj objtab[3] = {
