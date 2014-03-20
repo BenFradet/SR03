@@ -12,44 +12,46 @@
 
 #define  ARRET	-1
 
-//3eme parametres est traite comme le message de fin
 int main(int argc, char *argv[]) {
+	int client_socket;
+	struct sockaddr_in server_addr;
+	struct hostent *host;
+    unsigned short port;
+    char *hostname;
+
 	if(argc < 3) {
-		puts("Pas de hostname et port...");
+		puts("Argument missing, usage: <host> <port>...");
 		exit(1);	
 	}
+    port = atoi(argv[2]);
+    hostname = argv[1];
 	
-	int clientfd;
-	struct sockaddr_in server_addr;
-	struct hostent *server;
-
-	if((clientfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-			perror("socket");
-			exit(1);	
-	}
+	if((client_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		exit(1);
+    }
 	
-	bzero(&server, sizeof(struct sockaddr_in));	
-	if(!(server = gethostbyname(argv[1]))) {
-			perror("server");
-			exit(1);	
+	bzero(&host, sizeof(struct hostent));	
+	if(!(host = gethostbyname(hostname))) {
+		perror("host");
+		exit(1);	
 	}
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(atoi(argv[2]));
+	server_addr.sin_port = htons(port);
 
-    //doesnt work
 	bcopy((char *)server->h_addr, 
 		  (char *)&server_addr.sin_addr.s_addr,
   		  (size_t)(server->h_length));
 
-	if(connect(clientfd, (struct sockaddr *)&server_addr,
+	if(connect(client_socket, (struct sockaddr *)&server_addr,
 			    sizeof(server_addr)) < 0) {
-			perror("connect");
-			exit(1);	
+		perror("connect");
+		exit(1);	
 	}
 
 	int n, i;
 	for(i = 0; i < TABLEN; i++) {
-		n = write(clientfd, &objtab[i], sizeof(obj));	
+		n = write(client_socket, &objtab[i], sizeof(obj));	
 		if(n < 0) {
 			perror("write");
 			exit(1);
@@ -57,13 +59,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	obj fin = {"arret", "arret", 0, 0, 0, ARRET};
-	n = write(clientfd, &fin, sizeof(obj));
-
+	n = write(client_socket, &fin, sizeof(obj));
 	if(n < 0) {
-			perror("write");
-			exit(1);
+		perror("write");
+		exit(1);
 	}
 	
-	close(clientfd);
+	close(client_socket);
 	return 0;
 }
