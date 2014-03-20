@@ -10,7 +10,7 @@
 #include "defobj.h"
 #include "iniobj.h"
 
-#define  ARRET 		2
+#define  ARRET 		-1
 #define	 FERME		3
 
 //3eme parametres est traite comme le message de fin

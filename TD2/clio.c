@@ -10,7 +10,7 @@
 #include "defobj.h"
 #include "iniobj.h"
 
-#define  ARRET	2
+#define  ARRET	-1
 
 //3eme parametres est traite comme le message de fin
 int main(int argc, char *argv[]) {
@@ -56,17 +56,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	obj fin = {"ident_o1", "description_o1", 11, 12, 10.2345, 1};
+	obj fin = {"arret", "arret", 0, 0, 0, ARRET};
 	n = write(clientfd, &fin, sizeof(obj));
-
-	obj arret;
-	if(argc == 4 && (strcmp("arret", argv[3]) == 0)) {
-		arret.ii = 0;
-		arret.jj = 0;
-		arret.dd = 0;
-		arret.fin = ARRET;
-		write(clientfd, &arret, sizeof(obj));
-	}
 
 	if(n < 0) {
 			perror("write");

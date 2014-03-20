@@ -9,23 +9,22 @@
 
 #include "defobj.h"
 
-#define  ARRET	2
+#define  ARRET	    -1
 
 int reception(int clientfd) {
 	obj objet;
+    int n;
 	read(clientfd, &objet, sizeof(obj));
-	while(objet.fin == 0) {
+	while(objet.fin != ARRET) {
 		printf("Str1:%s, Str2:%s, ii:%d, jj:%d, dd:%f\n", 
                 objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
-		read(clientfd, &objet, sizeof(obj));
+		n = read(clientfd, &objet, sizeof(obj));
+        if(n < 0) {
+            perror("read");
+            exit(1);
+        }
 	}
 	putchar('\n');
-
-	//Detecter l'arret
-	int n = read(clientfd, &objet, sizeof(obj));
-	if(n > 0 && objet.fin == ARRET){
-		return 1;
-	}
 
 	return 0;
 }

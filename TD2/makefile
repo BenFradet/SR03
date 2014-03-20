@@ -32,3 +32,6 @@ client.o:client.c defobj.h iniobj.h
 
 clean:
 	rm *.o
+
+cleanEx:
+	rm clio client server sernow sero
