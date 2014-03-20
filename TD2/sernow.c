@@ -83,7 +83,9 @@ int main(int argc, char *argv[]) {
 		
 		pid_t pid = fork();
 		if(pid == 0) {
-			exit(reception(clientfd));
+			int ret = reception(clientfd);
+			close(clientfd);
+			exit(ret);
 		}
 	}
 
