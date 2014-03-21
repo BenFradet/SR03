@@ -9,12 +9,16 @@
 
 #include "defobj.h"
 
-#define  ARRET	    -1
+#define  ARRET -1
 
 int reception(int client_socket) {
 	obj objet;
     int n;
-	read(client_socket, &objet, sizeof(obj));
+	n = read(client_socket, &objet, sizeof(obj));
+    if(n < 0) {
+        perror("read");
+        exit(1);
+    }
 	while(objet.fin != ARRET) {
 		printf("Str1:%s, Str2:%s, ii:%d, jj:%d, dd:%f\n", 
                 objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);

@@ -39,10 +39,9 @@ int main(int argc, char *argv[]) {
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 
-	bcopy((char *)server->h_addr, 
+	bcopy((char *)host->h_addr, 
 		  (char *)&server_addr.sin_addr.s_addr,
-  		  (size_t)(server->h_length));
-
+  		  (size_t)(host->h_length));
 	if(connect(client_socket, (struct sockaddr *)&server_addr,
 			    sizeof(server_addr)) < 0) {
 		perror("connect");
