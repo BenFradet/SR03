@@ -31,7 +31,6 @@ int main(int argc, char *argv[]) {
 		exit(1);
     }
 	
-	bzero(&host, sizeof(struct hostent));	
 	if(!(host = gethostbyname(hostname))) {
 		perror("host");
 		exit(1);	
@@ -63,7 +62,7 @@ int main(int argc, char *argv[]) {
 		perror("write");
 		exit(1);
 	}
-	
+
 	close(client_socket);
 	return 0;
 }
