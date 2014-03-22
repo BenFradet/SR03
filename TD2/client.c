@@ -11,78 +11,69 @@
 #include "iniobj.h"
 
 #define  ARRET 		-1
-#define	 FERME		3
 
-//3eme parametres est traite comme le message de fin
 int main(int argc, char *argv[]) {
+    int client_socket;
+    struct sockaddr_in server_addr;
+    struct hostent *host;
+    unsigned short port;
+    char *hostname;
+
 	if(argc < 3) {
-		puts("Pas de hostname et port...");
+		puts("Argument missing, usage: localhost <port>...");
+		exit(1);	
+	}
+    port = atoi(argv[2]);
+    hostname = argv[1];
+
+	if((client_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
 		exit(1);	
 	}
 	
-	int clientfd, n, i;
-	struct sockaddr_in server_addr;
-	struct hostent *server;
-
-	if((clientfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-			perror("socket");
-			exit(1);	
-	}
-	
-	bzero(&server, sizeof(struct sockaddr_in));	
-	if(!(server = gethostbyname(argv[1]))) {
-			perror("server");
-			exit(1);	
-	}
+	//bzero(&host, sizeof(struct hostent));	
+	if(!(host = gethostbyname(hostname))) {
+		perror("server");
+		exit(1);
+    }
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(atoi(argv[2]));
+	server_addr.sin_port = htons(port);
 
-	bcopy((char *)server->h_addr, 
+	bcopy((char *)host->h_addr, 
 		  (char *)&server_addr.sin_addr.s_addr,
-  		  (size_t)(server->h_length));
-
-	if(connect(clientfd, (struct sockaddr *)&server_addr,
+  		  (size_t)(host->h_length));
+	if(connect(client_socket, (struct sockaddr *)&server_addr,
 			    sizeof(server_addr)) < 0) {
-			perror("connect");
-			exit(1);	
+		perror("connect");
+		exit(1);	
 	}
 
+    ssize_t size_received, size_sent;
+    obj objet;
+    int i;
 	for(i = 0; i < TABLEN; i++) {
-		n = write(clientfd, &objtab[i], sizeof(obj));	
-		if(n < 0) {
-			perror("write");
+		size_sent = send(client_socket, &objtab[i], sizeof(obj), 0);	
+		if(size_sent < 0) {
+			perror("send");
 			exit(1);
 		}
+        size_received = recv(client_socket, &objet, sizeof(obj), 0);
+        if(size_received < 0) {
+            perror("recv");
+            exit(1);
+        } else {
+            printf("Objet modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
+                    objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
+        }
 	}
 
-	obj fin = {"ident_o1", "description_o1", 11, 12, 10.2345, 1};
-	n = write(clientfd, &fin, sizeof(obj));
-
-	if(n < 0) {
-			perror("write");
-			exit(1);
-	}
-	
-	while(1){
-		if(n = read(clientfd, &fin, sizeof(obj)) > 0){
-			if(fin.fin == 1){
-				break;
-			}
-
-			printf("Objet modifié:{str1:%s, str2:%s, ii:%d, jj:%d, dd:%f}\n", 
-            		fin.str1, fin.str2, fin.ii, fin.jj, fin.dd);
-		}
-	}
-	
-	fin.fin = FERME;
-	write(clientfd, &fin, sizeof(obj));
-
-	obj arret;
-	if(argc == 4 && (strcmp("arret", argv[3]) == 0)) {
-		arret.fin = ARRET;
-		write(clientfd, &arret, sizeof(obj));
+	obj fin = {"arret", "arret", 0, 0, 0.0, ARRET};
+	size_sent = send(client_socket, &fin, sizeof(obj), 0);
+	if(size_sent < 0) {
+		perror("send");
+		exit(1);
 	}
 
-	close(clientfd);
+	close(client_socket);
 	return 0;
 }

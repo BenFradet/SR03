@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     char *hostname;
 
 	if(argc < 3) {
-		puts("Argument missing, usage: <host> <port>...");
+		puts("Argument missing, usage: localhost <port>...");
 		exit(1);	
 	}
     port = atoi(argv[2]);
@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
     }
 	
+	//bzero(&host, sizeof(struct hostent));	
 	if(!(host = gethostbyname(hostname))) {
 		perror("host");
 		exit(1);	
@@ -56,13 +57,13 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	obj fin = {"arret", "arret", 0, 0, 0, ARRET};
+	obj fin = {"arret", "arret", 0, 0, 0.0, ARRET};
 	n = write(client_socket, &fin, sizeof(obj));
 	if(n < 0) {
 		perror("write");
 		exit(1);
 	}
-
+	
 	close(client_socket);
 	return 0;
 }

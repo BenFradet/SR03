@@ -18,7 +18,7 @@ int reception(int client_socket) {
 	n = read(client_socket, &objet, sizeof(obj));
     if(n < 0) {
         perror("read");
-        exit(1);
+        return 1;
     }
 	while(objet.fin != ARRET) {
 		printf("Str1:%s, Str2:%s, ii:%d, jj:%d, dd:%f\n", 
@@ -26,7 +26,7 @@ int reception(int client_socket) {
 		n = read(client_socket, &objet, sizeof(obj));
         if(n < 0) {
             perror("read");
-            exit(1);
+            return 1;
         }
 	}
 	putchar('\n');
@@ -37,18 +37,18 @@ int reception(int client_socket) {
 void sigchldHandler(int n) {
     pid_t pid;
 	int status;
-    if((pid = waitpid(-1, &status, WNOHANG)) < 0) {
-        perror("waitpid child");
-        exit(1);
-    } else {
+    pid = waitpid(-1, &status, WNOHANG);
+    if(WIFEXITED(status)) {
         printf("Child %d done\n", (int)pid);
+    } else {
+        perror("waitpid child");
     }
 }
 
 int main(int argc, char *argv[]) {
     int server_socket, client_socket;
 	int sockaddr_size;
-	struct sockaddr_in server_addr, clien_addr;
+	struct sockaddr_in server_addr;
     unsigned short port;
 
 	if(argc < 2) {
