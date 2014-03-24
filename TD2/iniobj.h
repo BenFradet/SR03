@@ -1,6 +1,6 @@
 #define TABLEN	3
 
-obj objtab[3] = {
+obj objtab[TABLEN] = {
     { .str1 = "ident_o1", .str2 = "description_o1", 
         .ii =  11, .jj = 12, .dd = 10.2345, .fin = 0 },
     { .str1 = "ident_o2", .str2 = "description_o2",
