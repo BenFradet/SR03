@@ -19,6 +19,24 @@ void recvHandler(ssize_t size) {
     }
 }
 
+void metaHandler(metadata meta, int client_socket) {
+    if(strcmp(meta.type, "char") == 0) {
+        char buffer[meta.qty];
+        recvHandler(recv(client_socket, &buffer, sizeof(char) * meta.qty, 0));
+        printf("%s modifiee vaut %s\n", meta.attribut, buffer);
+    } else if(strcmp(meta.type, "int") == 0) {
+        int buffer;
+        recvHandler(recv(client_socket, &buffer, sizeof(int), 0));
+        printf("%s modifiee vaut %d\n", meta.attribut, buffer);
+    } else if(strcmp(meta.type, "double") == 0) {
+        double buffer;
+        recvHandler(recv(client_socket, &buffer, sizeof(double), 0));
+        printf("%s modifiee vaut %f\n", meta.attribut, buffer);
+    } else {
+        printf("Type non reconnu\n");
+    }
+}
+
 int main(int argc, char *argv[]) {
     int client_socket;
     struct sockaddr_in server_addr;
@@ -55,7 +73,7 @@ int main(int argc, char *argv[]) {
 		exit(1);	
 	}
 
-    ssize_t size_received, size_sent;
+    ssize_t size_sent;
     obj objet;
     int i;
 	for(i = 0; i < TABLEN; i++) {
@@ -65,29 +83,19 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 
+        printf("Objet non modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
+                objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
         metadata meta;
         int j;
         for(j = 0; j < 6; j++) {
             recvHandler(recv(client_socket, &meta, sizeof(meta), 0));
-            printf("Lecture d'un %s ayant pour quantite %d\n", 
+            printf("Lecture d'un %s ayant pour quantite %d ", 
                     meta.type, meta.qty);
+            metaHandler(meta, client_socket);
         }
         
-        recvHandler(recv(client_socket, &objet.str1, 
-                    sizeof(objet.str1), 0));
-        recvHandler(recv(client_socket, &objet.str2,
-                    sizeof(objet.str2), 0));
-        recvHandler(recv(client_socket, &objet.ii,
-                    sizeof(objet.ii), 0));
-        recvHandler(recv(client_socket, &objet.jj,
-                    sizeof(objet.jj), 0));
-        recvHandler(recv(client_socket, &objet.dd,
-                    sizeof(objet.dd), 0));
-        recvHandler(recv(client_socket, &objet.fin,
-                    sizeof(objet.fin), 0));
-        
-        printf("Objet modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
-               objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
+        //printf("Objet modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
+        //       objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
     
         //size_received = recv(client_socket, &objet, sizeof(obj), 0);
         //if(size_received < 0) {

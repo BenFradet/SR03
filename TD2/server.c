@@ -50,32 +50,40 @@ int reception(int client_socket) {
                 metadata meta;
                 sprintf(meta.type, "char");
                 meta.qty = sizeof(objet.str1);
+                sprintf(meta.attribut, "str1");
                 sendHandler(send(client_socket, &meta, sizeof(meta), 0));
+                sendHandler(send(client_socket, &objet.str1, 
+                            sizeof(objet.str1), 0));
 
                 meta.qty = sizeof(objet.str2);
+                sprintf(meta.attribut, "str2");
                 sendHandler(send(client_socket, &meta, sizeof(meta), 0));
+                sendHandler(send(client_socket, &objet.str2,
+                            sizeof(objet.str2), 0));
 
                 sprintf(meta.type, "int");
                 meta.qty = 1;
+                sprintf(meta.attribut, "ii");
                 sendHandler(send(client_socket, &meta, sizeof(meta), 0));
-                sendHandler(send(client_socket, &meta, sizeof(meta), 0));
-                sendHandler(send(client_socket, &meta, sizeof(meta), 0));
-
-                sprintf(meta.type, "double");
-                sendHandler(send(client_socket, &meta, sizeof(meta), 0));
-
-                sendHandler(send(client_socket, &objet.str1, 
-                            sizeof(objet.str1), 0));
-                sendHandler(send(client_socket, &objet.str2,
-                            sizeof(objet.str2), 0));
                 sendHandler(send(client_socket, &objet.ii, 
                             sizeof(objet.ii), 0));
+
+                sprintf(meta.attribut, "jj");
+                sendHandler(send(client_socket, &meta, sizeof(meta), 0));
                 sendHandler(send(client_socket, &objet.jj, 
                         sizeof(objet.jj), 0));
-                sendHandler(send(client_socket, &objet.dd, 
-                            sizeof(objet.dd), 0));
-                sendHandler(send(client_socket, &objet.fin,
+
+                sprintf(meta.attribut, "fin");
+                sendHandler(send(client_socket, &meta, sizeof(meta), 0));
+                sendHandler(send(client_socket, &objet.fin, 
                             sizeof(objet.fin), 0));
+
+                sprintf(meta.type, "double");
+                sprintf(meta.attribut, "dd");
+                sendHandler(send(client_socket, &meta, sizeof(meta), 0));
+                sendHandler(send(client_socket, &objet.dd,
+                            sizeof(objet.dd), 0));
+
                 //size_sent = send(client_socket, &objet, sizeof(objet), 0);
                 //if(size_sent < 0) {
                 //    perror("send");
