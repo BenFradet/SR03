@@ -8,9 +8,16 @@
 #include <sys/types.h>
 
 #include "defobj.h"
+#include "defmeta.h"
 #include "iniobj.h"
 
 #define  ARRET 		-1
+
+void recvHandler(ssize_t size) {
+    if(size < 0) {
+        perror("recv");
+    }
+}
 
 int main(int argc, char *argv[]) {
     int client_socket;
@@ -57,14 +64,39 @@ int main(int argc, char *argv[]) {
 			perror("send");
 			exit(1);
 		}
-        size_received = recv(client_socket, &objet, sizeof(obj), 0);
-        if(size_received < 0) {
-            perror("recv");
-            exit(1);
-        } else {
-            printf("Objet modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
-                    objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
+
+        metadata meta;
+        int j;
+        for(j = 0; j < 6; j++) {
+            recvHandler(recv(client_socket, &meta, sizeof(meta), 0));
+            printf("Lecture d'un %s ayant pour quantite %d\n", 
+                    meta.type, meta.qty);
         }
+        
+        recvHandler(recv(client_socket, &objet.str1, 
+                    sizeof(objet.str1), 0));
+        recvHandler(recv(client_socket, &objet.str2,
+                    sizeof(objet.str2), 0));
+        recvHandler(recv(client_socket, &objet.ii,
+                    sizeof(objet.ii), 0));
+        recvHandler(recv(client_socket, &objet.jj,
+                    sizeof(objet.jj), 0));
+        recvHandler(recv(client_socket, &objet.dd,
+                    sizeof(objet.dd), 0));
+        recvHandler(recv(client_socket, &objet.fin,
+                    sizeof(objet.fin), 0));
+        
+        printf("Objet modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
+               objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
+    
+        //size_received = recv(client_socket, &objet, sizeof(obj), 0);
+        //if(size_received < 0) {
+        //    perror("recv");
+        //    exit(1);
+        //} else {
+        //    printf("Objet modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
+        //            objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
+        //}
 	}
 
 	obj fin = {"arret", "arret", 0, 0, 0.0, ARRET};

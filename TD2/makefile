@@ -1,33 +1,33 @@
-all:sero clio sernow server client clean
+all: sero clio sernow server client clean
 
-sero:sero.o
+sero: sero.o
 	gcc -o sero sero.o
 
-sernow:sernow.o
+sernow: sernow.o
 	gcc -o sernow sernow.o
 
-clio:clio.o
+clio: clio.o
 	gcc -o clio clio.o
 
-server:server.o
+server: server.o
 	gcc -o server server.o
 
-client:client.o
+client: client.o
 	gcc -o client client.o
 
-sero.o:sero.c defobj.h
+sero.o: sero.c defobj.h
 	gcc -c sero.c
 
-clio.o:clio.c defobj.h iniobj.h
+clio.o: clio.c defobj.h iniobj.h
 	gcc -c clio.c
 
-sernow.o:sernow.c defobj.h
+sernow.o: sernow.c defobj.h
 	gcc -c sernow.c
 
-server.o:server.c defobj.h
+server.o: server.c defobj.h defmeta.h
 	gcc -c server.c
 
-client.o:client.c defobj.h iniobj.h
+client.o: client.c defobj.h defmeta.h iniobj.h
 	gcc -c client.c
 
 clean:
