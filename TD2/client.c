@@ -74,7 +74,6 @@ int main(int argc, char *argv[]) {
 	}
 
     ssize_t size_sent;
-    obj objet;
     int i;
 	for(i = 0; i < TABLEN; i++) {
 		size_sent = send(client_socket, &objtab[i], sizeof(obj), 0);	
@@ -84,8 +83,8 @@ int main(int argc, char *argv[]) {
 		}
 
         printf("Objet non modifie: {str1:%s,str2:%s,ii:%d,jj:%d,dd:%f}\n",
-                objet.str1, objet.str2, objet.ii, objet.jj, objet.dd);
-        metadata meta;
+                objtab[i].str1, objtab[i].str2, objtab[i].ii, objtab[i].jj, objtab[i].dd);
+        metadata meta;  
         int j;
         for(j = 0; j < 6; j++) {
             recvHandler(recv(client_socket, &meta, sizeof(meta), 0));
