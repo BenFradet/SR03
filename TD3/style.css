@@ -1,0 +1,27 @@
+.tt {
+    background-color: blue;
+}
+
+td.cell5 {
+    border: 5px dashed blue;
+}
+
+a:visited {
+    color: yellow;
+    font-size: 20px;
+}
+
+div#up {
+    position: absolute;
+    left: 150px;
+    top: 150px;
+    height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    zindex: 2;
+}
+
+#pushme {
+    font-size: 24pt;
+    color: red;
+}

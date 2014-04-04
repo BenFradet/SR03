@@ -1,0 +1,9 @@
+1) nc tuxa.sme.utc 80
+GET / HTTP/1.0
+en http1.1 host obligatoire
+
+2) nc proxyweb.utc.fr 3128
+GET http://www.google.fr/ HTTP/1.1
+
+4) nc tuxa.sme.utc 80
+POST ~sr03/phpinfo/info_variables.php?test=12

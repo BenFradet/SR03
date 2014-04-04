@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>question 5</title>
+        <link rel="stylesheet" href="questions.css" type="text/css">
+    </head>
+    <body>
+        <form action="http://tuxa.sme.utc/~sr03/phpinfo/setcookie.php" method="POST">
+            <div class="container">
+                <label>Nom:</label>
+                <input type="text" name="name" size="12"><br>
+                <label>Valeur:</label>
+                <input type="text" name="value" size="12"><br>
+                <label>Chemin:</label>
+                <input type="text" name="path" size="12"><br>
+                <label>Domaine:</label>
+                <input type="text" name="domain" size="12"><br>
+                <label>Expiration en secondes:</label>
+                <input type="number" name="expireseconds" size="12"><br>
+            </div>
+            <label>Afficher phpinfo:</label>
+            <input type="checkbox" name="phpinfo" checked><br>
+            <input type="submit" value="valider">
+        </form>
+    </body>
+</html>
