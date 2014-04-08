@@ -15,7 +15,7 @@
     </head>
     <body>
         <label>Nom de l'&eacute;tudiant:</label>
-            <form action="" method="post">
+        <form action="" method="post">
             <input type="text" id="chaine" name="chaine"><br>
             <input type="button" value="get" onclick="getListOfStudents($('#chaine').val(), 'get')">
             <input type="submit" value="submit">
