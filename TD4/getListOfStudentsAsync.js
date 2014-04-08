@@ -37,3 +37,16 @@ function displayData() {
         $('#result').html('');
     }
 }
+
+var str = '';
+$(document).ready(function() {
+    function mainLoop() {
+        if(str != $('#chaine').val()) {
+            str = $('#chaine').val();
+            getListOfStudents(str, 'get');
+        }
+    }
+
+    setTimeout(mainLoop, 300);
+    setInterval(mainLoop, 300);
+});
