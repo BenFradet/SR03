@@ -1,1 +1,8 @@
 *.swp
+
+**/bin/
+**/.settings/
+**/.project
+**/.classpath
+**/.metadata/
+**/doc/
