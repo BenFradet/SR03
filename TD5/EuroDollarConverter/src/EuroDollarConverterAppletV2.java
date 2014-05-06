@@ -4,17 +4,24 @@ import java.awt.event.*;
 import java.net.*;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
+import java.io.*;
+import java.util.*;
+
+import javax.xml.parsers.*;
+
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 
 public class EuroDollarConverterAppletV2 extends Applet implements MouseListener {
 	Button convertButton;
-	TextField exchangeRateField;
-	Label exchangeRateLabel;
 	TextField valueField;
 	Label valueLabel;
 	Label resultLabel;
+	float exchangeRate = 0.0f;
 	
 	public void init() {
+				
 		setLayout(null);
 		addNotify();
 		
@@ -24,14 +31,6 @@ public class EuroDollarConverterAppletV2 extends Applet implements MouseListener
 		convertButton.setBounds(216, 200, 80, 20);
 		convertButton.addMouseListener(this);
 		add(convertButton);
-		
-		exchangeRateLabel = new Label("Exchange rate: ");
-		exchangeRateLabel.setBounds(50, 50, 100, 20);
-		add(exchangeRateLabel);
-		
-		exchangeRateField = new TextField();
-		exchangeRateField.setBounds(150, 50, 50, 20);
-		add(exchangeRateField);
 		
 		valueLabel = new Label("Value: ");
 		valueLabel.setBounds(50, 100, 100, 20);
@@ -44,20 +43,29 @@ public class EuroDollarConverterAppletV2 extends Applet implements MouseListener
 		resultLabel = new Label();
 		resultLabel.setBounds(0, 230, 512, 20);
 		add(resultLabel);
+		
+		try {
+			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+			Document doc = documentBuilder.parse(new URL("http://tuxa.sme.utc/~sr03p012/exchangeRate.php").openStream());
+			
+			NodeList nodeList = doc.getElementsByTagName("taux");
+			String exchangeRateStr = nodeList.item(0).getChildNodes().item(0).getNodeValue();
+			try {
+				exchangeRate = Float.parseFloat(exchangeRateStr);
+			}
+			catch(NumberFormatException ex) {
+				resultLabel.setText("Invalid exchange rate, it has to be a number");
+				return;
+			}
+		}
+		catch(ParserConfigurationException | IOException | SAXException ex) {
+			resultLabel.setText("Couldn't retrieve the exchange rate");
+		}
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent event) {
-		String exchangeRateStr = exchangeRateField.getText();
-		float exchangeRate = 0.0f;
-		try {
-			exchangeRate = Float.parseFloat(exchangeRateStr);
-		}
-		catch(NumberFormatException ex) {
-			resultLabel.setText("Invalid exchange rate, it has to be a number");
-			return;
-		}
-		
+	public void mouseClicked(MouseEvent event) {		
 		EuroDollarConverter converter = new EuroDollarConverter(exchangeRate);
 		DecimalFormat formatter = new DecimalFormat("#.00");
 		Pattern pattern = Pattern.compile("\\d+(\\.\\d{1,2}){0,1} [\\$€]");
