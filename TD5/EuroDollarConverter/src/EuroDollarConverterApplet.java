@@ -25,7 +25,7 @@ public class EuroDollarConverterApplet extends Applet implements MouseListener {
 		convertButton.addMouseListener(this);
 		add(convertButton);
 		
-		exchangeRateLabel = new Label("Exchange rate: ");
+		exchangeRateLabel = new Label("Exchange rate (dollar to euros): ");
 		exchangeRateLabel.setBounds(50, 50, 100, 20);
 		add(exchangeRateLabel);
 		

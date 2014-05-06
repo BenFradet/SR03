@@ -18,6 +18,7 @@ public class EuroDollarConverterAppletV2 extends Applet implements MouseListener
 	TextField valueField;
 	Label valueLabel;
 	Label resultLabel;
+	Label exchangeRateLabel;
 	float exchangeRate = 0.0f;
 	
 	public void init() {
@@ -39,6 +40,10 @@ public class EuroDollarConverterAppletV2 extends Applet implements MouseListener
 		valueField = new TextField();
 		valueField.setBounds(150, 100, 50, 20);
 		add(valueField);
+
+		exchangeRateLabel = new Label("Exchange rate (dollar -> euro): ");
+		exchangeRateLabel.setBounds(50, 50, 250, 20);
+		add(exchangeRateLabel);
 		
 		resultLabel = new Label();
 		resultLabel.setBounds(0, 230, 512, 20);
@@ -53,6 +58,7 @@ public class EuroDollarConverterAppletV2 extends Applet implements MouseListener
 			String exchangeRateStr = nodeList.item(0).getChildNodes().item(0).getNodeValue();
 			try {
 				exchangeRate = Float.parseFloat(exchangeRateStr);
+				exchangeRateLabel.setText("Exchange rate (dollar -> euro): " + exchangeRate);
 			}
 			catch(NumberFormatException ex) {
 				resultLabel.setText("Invalid exchange rate, it has to be a number");
@@ -61,7 +67,7 @@ public class EuroDollarConverterAppletV2 extends Applet implements MouseListener
 		}
 		catch(ParserConfigurationException | IOException | SAXException ex) {
 			resultLabel.setText("Couldn't retrieve the exchange rate");
-		}
+		}		
 	}
 
 	@Override
