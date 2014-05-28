@@ -6,3 +6,6 @@
 **/.classpath
 **/.metadata/
 **/doc/
+stdsoap2.c
+stdsoap2.h
+typemap.dat
