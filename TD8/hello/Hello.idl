@@ -1,0 +1,6 @@
+// IDL : Hello.idl
+
+interface Hello
+{
+    void say_hello();
+};
